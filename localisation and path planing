@@ -1,0 +1,228 @@
+import qi
+import argparse
+import sys
+from matplotlib import pyplot as plt
+from matplotlib import colors
+from naoqi import ALProxy
+import time
+import math
+import almath
+def sonarr():
+    sonar_service = session.service("ALSonar")
+    sonar_service.subscribe("myApplication")
+    r = memory_service.getData("Device/SubDeviceList/US/Right/Sensor/Value")
+    sonar_service.unsubscribe("myApplication")
+    return r
+def sonarl():
+    sonar_service = session.service("ALSonar")
+    sonar_service.subscribe("myApplication")
+    l = memory_service.getData("Device/SubDeviceList/US/Left/Sensor/Value")
+    sonar_service.unsubscribe("myApplication")
+    return r
+def map():
+    cmap = colors.ListedColormap(['white', 'red'])
+    plt.figure(figsize=(6, 6))
+    plt.pcolor(map[::-1], cmap=cmap, edgecolors='k', linewidths=3)
+    plt.show()
+
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--ip", type=str, default="127.0.0.1",
+                        help="Robot IP address. On robot or Local Naoqi: use '1127.0.0.1'.")
+    parser.add_argument("--port", type=int, default=9559,
+                        help="Naoqi port number")
+
+    args = parser.parse_args()
+    session = qi.Session()
+    try:
+        session.connect("tcp://" + args.ip + ":" + str(args.port))
+    except RuntimeError:
+        print ("Can't connect to Naoqi at ip \"" + args.ip + "\" on port " + str(args.port) +".\n"
+               "Please check your script arguments. Run with -h option for help.")
+        sys.exit(1)
+    angle=1
+    countTurn = 0
+    x = 6
+    y = 6
+    map = [[0 for col in range(x)] for row in range(y)]
+    print(map)
+    cmap = colors.ListedColormap(['white', 'red'])
+    plt.figure(figsize=(6, 6))
+    plt.pcolor(map[::-1], cmap=cmap, edgecolors='k', linewidths=3)
+    plt.show()
+    x = 5
+    y = 5
+    motion = ALProxy("ALMotion", "127.0.0.1", 9559)
+    memory_service = session.service("ALMemory")
+    r= sonarr()
+    print(r)
+    if (0.1<r<0.29999999):
+        x=0
+    if (0.3 < r < 0.4999999):
+        x=1
+    if (0.5 < r < 0.69999999):
+        x=2
+    if (0.7< r < 0.89999999):
+        x=3
+    if (0.9 < r <  1.599999):
+        x=4
+    if( 1.6 < r > 2.599999):
+        x= 5
+    print( x)
+    motion.post.moveTo(0, 0,math.pi/2)
+    time.sleep(10)
+    r = sonarr()
+    print(r)
+    if (0.1<r<0.29999999):
+        y=0
+    if (0.3 < r < 0.4999999):
+        y=1
+    if (0.5 < r < 0.69999999):
+        y=2
+    if (0.7< r < 0.89999999):
+        y=3
+    if (0.9 < r <  1.599999):
+        y=4
+    if( 1.6 < r > 2.599999):
+        y= 5
+    print(r)
+    print(y)
+    map[x][y]=1
+    cmap = colors.ListedColormap(['white', 'red'])
+    plt.figure(figsize=(6, 6))
+    plt.pcolor(map[::-1], cmap=cmap, edgecolors='k', linewidths=3)
+    plt.show()
+    print('input x destinition')
+    x_value = input()
+    print('input y destinition')
+    y_value = input()
+    if(y > y_value) and (x > x_value):
+        y = y - y_value
+        x = x - x_value
+        print "y=", y
+        print "x=", x
+        c = float(y) / float(x)
+        print  "c=", c
+        b = float(math.atan(c))
+        print "b=", b
+        d = math.sqrt(x ** 2 + y ** 2)
+        print "d=", d
+        d = round(d)
+        d = int(d)
+        print "d=", d
+        time.sleep(2)
+        motion.post.moveTo(0, 0, -b)
+        time.sleep(9)
+        for angle in range(d):
+            motion.post.moveTo(0.2, 0, 0)
+            time.sleep(5)
+            print angle
+            if angle == d:
+                break
+    if (y < y_value) and (x > x_value) :
+        motion.post.moveTo(0, 0, math.pi)
+        time.sleep(9)
+        y =  y_value -y
+        x = x - x_value
+        print "y=", y
+        print "x=", x
+        c = float(y) / float(x)
+        print  "c=", c
+        b = float(math.atan(c))
+        print "b=", b
+        d = math.sqrt(x ** 2 + y ** 2)
+        print "d=", d
+        d = round(d)
+        d = int(d)
+        print "d=", d
+        time.sleep(2)
+        motion.post.moveTo(0, 0, -b)
+        time.sleep(9)
+        for angle in range(d):
+            motion.post.moveTo(0.2, 0, 0)
+            time.sleep(5)
+            print angle
+            if angle == d:
+                break
+    if(y > y_value) and ( x < x_value):
+        y =  y - y_value
+        x = x_value - x
+        print "y=", y
+        print "x=", x
+        c = float(y) / float(x)
+        print  "c=", c
+        b = float(math.atan(c))
+        print "b=", b
+        d = math.sqrt(x ** 2 + y ** 2)
+        print "d=", d
+        d = round(d)
+        d = int(d)
+        print "d=", d
+        time.sleep(2)
+        motion.post.moveTo(0, 0, b)
+        time.sleep(9)
+        for angle in range(d):
+            motion.post.moveTo(0.2, 0, 0)
+            time.sleep(5)
+            print angle
+            if angle == d:
+                break
+    if (y < y_value) and (x < x_value):
+        motion.post.moveTo(0, 0, math.pi)
+        time.sleep(7)
+        y = y_value - y
+        x = x_value -x
+        print "y=", y
+        print "x=", x
+        c = float(y) / float(x)
+        print  "c=", c
+        b = float(math.atan(c))
+        print "b=", b
+        d = math.sqrt(x ** 2 + y ** 2)
+        print "d=", d
+        d = round(d)
+        d = int(d)
+        print "d=", d
+        time.sleep(2)
+        motion.post.moveTo(0, 0, b)
+        time.sleep(9)
+        for angle in range(d):
+            motion.post.moveTo(0.2, 0, 0)
+            time.sleep(5)
+            print angle
+            if angle == d:
+                break
+    if(x==x_value) and (y_value < y):
+        print "f"
+        for  y_value in range (y):
+            motion.post.moveTo(0.2, 0, 0)
+            time.sleep(3)
+            if y == y_value :
+                break
+    if(x==x_value) and (y_value > y):
+        motion.post.moveTo(0, 0, -math.pi)
+        time.sleep(9)
+        motion.post.moveTo(0, 0, -math.pi)
+        time.sleep(9)
+        print "t"
+        for  y in range (y_value):
+            motion.post.moveTo(0.2, 0, 0)
+            time.sleep(3)
+            if y == y_value :
+                break
+    if (y== y_value) and (x_value < x):
+        motion.post.moveTo(0, 0, -math.pi)
+        time.sleep(12)
+        for  x_value in range (x):
+            motion.post.moveTo(0.2, 0, 0)
+            time.sleep(3)
+    if (y== y_value) and (x_value > x):
+        motion.post.moveTo(0, 0, math.pi)
+        time.sleep(12)
+        s= x_value - x
+        print s
+        for  x in range (s):
+            motion.post.moveTo(0.2, 0, 0)
+            time.sleep(3)
