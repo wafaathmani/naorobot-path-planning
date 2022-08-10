@@ -15,3 +15,5 @@ to find hypotenuse value witch represent
 the number of steps and calculate the angle of it tan∅
 and we get the turning angle for the robot , now after getting the angle and the number od
 steps nao will walk to the destination point
+
+![image](https://user-images.githubusercontent.com/73589635/183877364-3827a36f-be9d-49c1-ad77-8b365342d904.png)
